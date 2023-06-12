@@ -6,7 +6,13 @@
 #include <unordered_map>
 #include <deque>
 #include <set>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
 using namespace std;
+using namespace __gnu_pbds;
+typedef tree<int,null_type,less<int>,rb_tree_tag,
+tree_order_statistics_node_update> indexed_set;
+
 
 
 long long mpow(long long n, long long p, long long m) {
@@ -76,9 +82,15 @@ vector<int> shortestPath(int n, int m, vector<vector<int>>& edges) {
 
 int main(){
 	vector <int> store = {1, 2, 3, 4};
+
 	cout << store.size() << endl;
 	store.erase(store.begin() + 1);
 	store.erase(store.begin() + 1);
 	cout << store.size() << endl;
-	
+	indexed_set s;
+	s.insert(3);	
+	s.insert(4);	
+	s.insert(5);	
+	s.insert(6);
+	cout << *s.find_by_order(2) << endl;	
 }
