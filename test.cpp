@@ -8,6 +8,7 @@
 #include <set>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
+#include <stack>
 #define x 2;
 using namespace std;
 using namespace __gnu_pbds;
@@ -89,6 +90,7 @@ int main(){
 	store.erase(store.begin() + 1);
 	cout << store.size() << endl;
 	indexed_set s;
+	stack <int> st;
 	s.insert(3);	
 	s.insert(4);	
 	s.insert(5);	
