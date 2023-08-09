@@ -65,39 +65,50 @@ public:
         return true;
     }
 
-    bool contains(string & check) {
-        node * hold = root;
-        int counter = 0;
-        for (auto it: check) {
-            if (hold->routes[it - 'a'] == NULL) {
-                return false;
+    bool helper(string & str, vector <node *> store) {
+        for (auto it: str) {
+            bool decider = false;
+            for (int i = 0; i < store.size(); i++) {
+                if (store[i] != NULL) {
+                    store[i] = store[i]->routes[it - 'a'];
+                }
+
+                if (store[i]->end) {
+                    decider = true;
+                }
             }
 
-            hold = hold->routes[it - 'a'];
-            if (hold->end == true) {
+            if (decider) {
+                store.push_back(root);
+            }
+        }
+
+        for (auto it: store) {
+            if (it && it->end) {
                 return true;
             }
-
-            counter++;
         }
 
         return false;
+    }
+
+    bool check(string & str) {
+        vector <node *> store = {root};
+        return helper(str, store);
     }
 };
 
 vector<string> findAllConcatenatedWordsInADict(vector<string>& words) {
     Trie t;
 
-    for (auto & it: words) {
-        t.insert(it);
-    }
-
     vector <string> ans;
 
     for (auto & it: words) {
-        if (t.contains(it)) {
+        if (t.check(it)) {
             ans.push_back(it);
         }
+
+        t.insert(it);
     }
 
     return ans;
