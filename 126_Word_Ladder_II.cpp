@@ -1,50 +1,111 @@
 #include <iostream>
 #include <vector>
-#include <queue>
-#include <unordered_map>
 #include <set>
+#include <algorithm>
 using namespace std;
 
-vector<vector<string>> findLadders(string beginWord, string endWord, vector<string>& wordList) {
-    vector <vector <string>> ans;
-    set <string> container;
+bool positionDiffer(string &first, string &second) {
+    int n = first.length();
+    int count = 0;
+    for(int i = 0; i < n; i++) {
+        if(first[i]!=second[i]) count++;
+        if(count > 1) return false; 
+    }
+    if(count) return true;
+    return false;
+}
 
-    for (auto it: wordList) {
-        container.insert(it);
+void backtrack(int node, int start, vector <vector <int>> & parents, vector <vector <int>> & ans, vector <int> & temp) {
+    if (node == start) {
+        temp.push_back(node);
+        ans.push_back(temp);
+        temp.pop_back();
+
+        return ;
     }
 
-    int mn = -1;
-    queue <pair <string, vector <string>>> store;
+    for (int i = 0; i < parents[node].size(); i++) {
+        temp.push_back(node);
+        backtrack(parents[node][i], start, parents, ans, temp);
+        temp.pop_back();
+    }
+}
 
-    store.push({beginWord, {beginWord}});       
-    unordered_map <string, int> visited;
-    visited[beginWord] = 0;
-
-    while (!store.empty()) {
-        pair <string, vector <string>> hold = store.front();
-        store.pop();
-
-        if (hold.first == endWord && (mn == -1 || hold.second.size() == mn)) {
-            mn = hold.second.size();
-            ans.push_back(hold.second);
+vector<vector<string>> findLadders(string beginWord, string endWord, vector<string>& wordList) {
+    vector <vector <string>> realans;
+    bool check = false;
+    int index = 0;
+    int counter = 0;
+    int target = -1;
+    for (auto & it: wordList) {
+        if (it == beginWord) {
+            index = counter;
+            check = true;
         }
+        if(it == endWord) {
+            target = counter;
+        }
+        counter++;
+    }
 
-        if (hold.second.size() <= visited[hold.first]) {
-            visited[hold.first] = hold.second.size();
 
-            for (int i = 0; i < hold.first.size(); i++) {
-                for (int j = 0; j < 26; j++) {
-                    string temp = hold.first;
-                    temp[i] = 'a' + i;
+    if (!check) {
+        index = wordList.size();
+        wordList.push_back(beginWord);
+    } 
 
-                    if (temp != hold.first && container.find(temp) != container.end()) {
-                        hold.second.push_back(temp);
-                        store.push({temp, hold.second});
-                        hold.second.pop_back();
-                    }
-                }
+    if (target == -1) {
+        return realans;
+    }
+
+    vector <int> graph [wordList.size()];      
+    for (int i = 0; i < wordList.size(); i++) {
+        for (int j = i + 1; j < wordList.size(); j++) {
+            if (positionDiffer(wordList[i], wordList[j])) {
+                graph[i].push_back(j);
+                graph[j].push_back(i);
+            }      
+        }
+    }   
+
+
+    set <pair <int, int>> pq;
+    pq.insert({0, index});
+    vector <int> dists(wordList.size(), 1e8);
+    vector <vector <int>> routes(wordList.size());
+    dists[index] = 0;
+    while (!pq.empty()) {
+        auto pos = pq.begin();
+        pair <int, int> hold = (*pos);
+        pq.erase(pos);
+
+        for (auto & it: graph[hold.second]) {
+            if (hold.first + 1 < dists[it]) {
+                routes[it].clear();
+                routes[it].push_back(hold.second);
+                pq.erase({dists[it], it});
+                dists[it] = hold.first + 1;
+                pq.insert({dists[it], it});
+            } else if (hold.first + 1 == dists[it]) {
+                routes[it].push_back(hold.second);
+                pq.insert({dists[it], it});
             }
-        }    
+        }
+    }
+
+
+    vector <vector <int>> temp; 
+    vector <int> hold;
+    backtrack(target, index, routes, temp, hold);
+
+    vector <vector <string>> ans;
+    for (int i = 0; i < temp.size(); i++) {
+        vector <string> ah;
+        reverse(temp[i].begin(), temp[i].end());
+        for (int j = 0; j < temp[i].size(); j++) {
+            ah.push_back(wordList[temp[i][j]]);
+        }
+        ans.push_back(ah);
     }
 
     return ans;
