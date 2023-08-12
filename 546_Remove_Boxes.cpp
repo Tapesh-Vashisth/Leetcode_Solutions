@@ -2,38 +2,37 @@
 #include <vector>
 using namespace std;
 
-int helper(vector <pair <int, int>> & boxes, int left, int right) {
+vector <vector <vector <int>>> dp;
+
+int helper(vector <int> & boxes, int left, int right, int k) {
     if (left > right) {
         return 0;
     } else if (left == right) {
-        return boxes[left].second * boxes[left].second;
+        return (k + 1) * (k + 1);
     }
 
-    int ret = INT32_MIN;
+    if (dp[left][right][k] != -1) {
+        return dp[left][right][k];
+    }
+
+    int mx = ((k + 1) * (k + 1)) + helper(boxes, left + 1, right, 0);
+
     for (int i = left + 1; i <= right; i++) {
-        if (boxes[i].first == boxes[left].first) {
-            int left = helper(boxes, left + 1, i - 1);
-
-            boxes[i].second += boxes[left].second;
-            int right = helper(boxes, i, right);
-            boxes[i].second -= boxes[left].second;
-
-            ret = max(ret, left + right);
+        if (boxes[i] == boxes[left]) {
+            int hold = helper(boxes, left + 1, i - 1, 0) + helper(boxes, i, right, k + 1);
+            mx = max(mx, hold);
         }
     }
 
-    return ret;
+
+    dp[left][right][k] = mx;
+
+    return mx;
 }
 
 int removeBoxes(vector<int>& boxes) {
-    vector <pair <int, int>> updated;
-    for (auto it: boxes) {
-        updated.push_back({it, 1});
-    }
-
-    int ans = helper(updated, 0, boxes.size() - 1);
-
-    return ans;
+    dp = vector <vector <vector <int>>> (boxes.size(), vector <vector<int>> (boxes.size(), vector<int> (boxes.size() + 1, -1))); 
+    return helper(boxes, 0, boxes.size() - 1, 0);
 }
 
 int main() {
