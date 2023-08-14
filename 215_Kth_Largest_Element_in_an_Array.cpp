@@ -144,6 +144,56 @@ int findKthLargest(vector<int>& nums, int k){
 }
 
 
+
+
+
+int partition(vector <int> & nums, int low, int high, int pivot) {
+    int temp = nums[low];
+    nums[low] = nums[pivot];
+    nums[pivot] = temp;
+
+    int part = low + 1;
+    for (int i = low + 1; i <= high; i++) {
+        if (nums[i] <= nums[low]) {
+            temp = nums[i];
+            nums[i] = nums[part];
+            nums[part] = temp;
+            part++;
+        }
+    }
+
+    temp = nums[low];
+    nums[low] = nums[part - 1];
+    nums[part - 1] = temp;
+    return nums.size() - part + 1;
+}
+
+
+int helper(vector <int> & nums, int low, int high, int k) {
+    if (low <= high) {
+        int mid = low + (high - low)/2;
+
+        int temp = nums[mid];
+    
+        int hold = partition(nums, low, high, mid);
+
+        if (hold == k) {
+            return temp;
+        } else if (hold < k) {
+            return helper(nums, low, nums.size() - hold - 1, k);
+        } else {
+            return helper(nums, nums.size() - hold + 1, high, k);
+        }
+    }
+
+    return -1;
+}
+
+int findKthLargest(vector<int>& nums, int k) {
+    return helper(nums, 0, nums.size() - 1, k);
+}
+
+
 int main(){
     vector <int> v = {3,2,3,3,2,4,5,5,1};
     cout << findKthLargest(v, 10) << endl;
