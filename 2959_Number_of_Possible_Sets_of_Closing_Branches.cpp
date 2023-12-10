@@ -1,8 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <map>
-#include <stack>
-#include <algorithm>
 using namespace std;
 
 int helper(int current, int n, int maxDistance, vector <bool> & taken, vector <vector <int>> & roads) {
