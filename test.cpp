@@ -1,69 +1,55 @@
 #include <iostream>
 #include <vector>
-#include <map>
-#include <stack>
 #include <algorithm>
+#include <iomanip>
 using namespace std;
 
-int helper(int current, int n, int maxDistance, vector <bool> & taken, vector <vector <int>> & roads) {
-    if (current == n) {
-        vector <vector <int>> mat(n, vector <int> (n, INT32_MAX));
+const long long mod = 1e9 + 7;
 
-        for (int i = 0; i < n; i++) {
-            mat[i][i] = 0;
-        }
-
-        for (auto it: roads) {
-            if ((taken[it[0]] && taken[it[1]])) {
-                mat[it[0]][it[1]] = min(mat[it[0]][it[1]], it[2]);
-                mat[it[1]][it[0]] = min(mat[it[1]][it[0]], it[2]);
-            }
-        }
-        
-
-        for (int k = 0; k < n; k++) {
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    if ((mat[k][j] != INT32_MAX && mat[i][k] != INT32_MAX) && mat[i][j] > (mat[i][k] + mat[k][j])) {
-                        mat[i][j] = mat[i][k] + mat[k][j];
-                    }
-                }
-            }
-        }
-
-        for (int i = 0; i < n; i++) {
-            if (taken[i]) {
-                for (int j = 0; j < n; j++) {
-                    if (taken[j]) {
-                        if (mat[i][j] == INT32_MAX || mat[i][j] > maxDistance) {
-                            return 0;
-                        }    
-                    }
-                }   
-            }
-        }
-
-        return 1;
+long long helper(int left, int right, vector <int> & store, vector <vector <long long>> & dp) {
+    if (left == right) {
+        return store[left];
     }
 
-    int ret = 0;
-    // take 
-    taken[current] = true;
-    ret += helper(current + 1, n, maxDistance, taken, roads);
+    if (dp[left][right] != -1) {
+        return dp[left][right];
+    }
 
-    // not take 
-    taken[current] = false;
-    ret += helper(current + 1, n, maxDistance, taken, roads);
+    long long mn = INT64_MAX;
 
-    return ret;
-}
+    long long total = 0;
+    for (int i = left; i <= right; i++) {
+        total += store[i];
+    }
 
-int numberOfSets(int n, int maxDistance, vector<vector<int>>& roads) {
-    vector <bool> taken(n, false);
+    long long current = 0;
+    for (int i = left; i < right; i++) {
+        long long holdLeft = helper(left, i, store, dp);
+        long long holdRight = helper(i + 1, right, store, dp);
+        current += store[i];
+        mn = min(mn, holdLeft + holdRight + ((i == left ? 0 : current)) + ((i + 1 == right) ? 0: (total - current)));   
+    }
 
-    return helper(0, n, maxDistance, taken, roads);
+    dp[left][right] = mn;
+
+    return mn;
 }
 
 int main() {
+    int n;
+    cin >> n;
+
+    vector <int> store;
+
+    for (int i = 0; i < n; i++) {
+        int x;
+        cin >> x;
+        store.push_back(x);
+    }
+
+    vector <vector <long long>> dp(n, vector <long long> (n, -1));
+
+    cout << helper(0, n - 1, store, dp) << endl;
+    
     return 0;
 }

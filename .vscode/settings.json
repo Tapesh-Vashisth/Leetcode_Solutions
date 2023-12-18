@@ -10,7 +10,8 @@
         "xutility": "cpp",
         "unordered_set": "cpp",
         "algorithm": "cpp",
-        "atomic": "cpp"
+        "atomic": "cpp",
+        "chrono": "cpp"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }
