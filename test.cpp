@@ -1,55 +1,75 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <iomanip>
+#include <set>
+#include <map>
 using namespace std;
 
-const long long mod = 1e9 + 7;
-
-long long helper(int left, int right, vector <int> & store, vector <vector <long long>> & dp) {
-    if (left == right) {
-        return store[left];
-    }
-
-    if (dp[left][right] != -1) {
-        return dp[left][right];
-    }
-
-    long long mn = INT64_MAX;
-
-    long long total = 0;
-    for (int i = left; i <= right; i++) {
-        total += store[i];
-    }
-
-    long long current = 0;
-    for (int i = left; i < right; i++) {
-        long long holdLeft = helper(left, i, store, dp);
-        long long holdRight = helper(i + 1, right, store, dp);
-        current += store[i];
-        mn = min(mn, holdLeft + holdRight + ((i == left ? 0 : current)) + ((i + 1 == right) ? 0: (total - current)));   
-    }
-
-    dp[left][right] = mn;
-
-    return mn;
-}
+class comp {
+    public:
+        bool operator()(pair <int, int> a, pair <int, int> b) const {
+            if (a.first > b.first) {
+                return true;
+            } else if (a.first < b.first) {
+                return false;
+            } else {
+                return a.second < b.second;
+            }
+        }
+};
 
 int main() {
-    int n;
-    cin >> n;
+    int l;
+    cin >> l;
 
-    vector <int> store;
-
-    for (int i = 0; i < n; i++) {
-        int x;
-        cin >> x;
-        store.push_back(x);
+    vector <int> heights;
+    for (int i = 0; i < 5; i++) {
+        int h;
+        cin >> h;
+        heights.push_back(h);
     }
 
-    vector <vector <long long>> dp(n, vector <long long> (n, -1));
+    // vector <vector <int>> dp(6, vector <int>> (l + 1, -1}));
 
-    cout << helper(0, n - 1, store, dp) << endl;
-    
+    vector <int> dp(l + 1, -1), prev(l + 1, -1);
+    dp[0] = 0;
+
+    for (int i = 1; i <= l; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (heights[j] > i || dp[i - heights[j]] == -1) continue;
+
+            if (dp[i] < dp[i - heights[j]] + 1) {
+                dp[i] = dp[i - heights[j]] + 1;
+                prev[i] = heights[j];
+            }
+        }
+    }
+
+
+
+    if (dp[l] == -1) {
+        cout << "Impossible" << endl;
+    } else {
+        set <pair <int, int>, comp> store;
+
+        int temp = l;
+
+        map <int, int> keep;
+
+        while (temp != 0) {
+            keep[prev[temp]]++;
+            temp = temp - prev[temp];
+        }
+
+        for (auto it: keep) {
+            store.insert({it.second, it.first});
+        }
+
+        for (auto it: store) {
+            cout << it.second << " ";
+        }
+        cout << endl;
+    }
+
     return 0;
 }
