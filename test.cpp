@@ -5,71 +5,100 @@
 #include <map>
 using namespace std;
 
-class comp {
-    public:
-        bool operator()(pair <int, int> a, pair <int, int> b) const {
-            if (a.first > b.first) {
-                return true;
-            } else if (a.first < b.first) {
-                return false;
-            } else {
-                return a.second < b.second;
-            }
+
+// summation
+struct segmenttree {
+    int n;
+    vector<int> st;
+
+    void init(int _n) {
+        this->n = _n;
+        st.resize(2 * n, 0);
+    }
+
+    void build(int start, int ending, int node, vector<int> &v) {
+        // leaf node base case
+        if (start == ending) {
+            st[node] = v[start];
+            return;
         }
+
+        int mid = (start + ending) / 2;
+
+        // left subtree is (start,mid)
+        build(start, mid, node + 1, v);
+
+        // right subtree is (mid+1,ending)
+        build(mid + 1, ending, node + 2 * (mid - start + 1), v);
+
+        st[node] = st[node + 1] + st[node + 2 * (mid - start + 1)];
+    }
+
+    int query(int start, int ending, int l, int r, int node) {
+        // non overlapping case
+        if (start > r || ending < l) {
+            return 0;
+        }
+
+        // complete overlap
+        if (start >= l && ending <= r) {
+            return st[node];
+        }
+
+        // partial case
+        int mid = (start + ending) / 2;
+
+        int q1 = query(start, mid, l, r, node + 1);
+        int q2 = query(mid + 1, ending, l, r, node + 2 * (mid - start + 1));
+
+        return q1 + q2;
+    }
+
+    void update(int start, int ending, int node, int index, int value) {
+        // base case
+        if (start == ending) {
+            st[node] = value;
+            return;
+        }
+
+        int mid = (start + ending) / 2;
+        if (index <= mid) {
+            // left subtree
+            update(start, mid, node + 1, index, value);
+        }
+        else {
+            // right
+            update(mid + 1, ending, node + 2 * (mid - start + 1), index, value);
+        }
+
+        st[node] = st[node + 1] + st[node + 2 * (mid - start + 1)];
+
+        return;
+    }
+
+    void build(vector<int> &v) {
+        build(0, n - 1, 0, v);
+    }
+
+    int query(int l, int r) {
+        return query(0, n - 1, l, r, 0);
+    }
+
+    void update(int x, int y) {
+        update(0, n - 1, 0, x, y);
+    }
 };
 
 int main() {
-    int l;
-    cin >> l;
+    vector <int> arr = {1, 2, 3, 4, 5};
+    segmenttree st;
+    st.init(arr.size());
+    st.build(arr);
 
-    vector <int> heights;
-    for (int i = 0; i < 5; i++) {
-        int h;
-        cin >> h;
-        heights.push_back(h);
-    }
-
-    // vector <vector <int>> dp(6, vector <int>> (l + 1, -1}));
-
-    vector <int> dp(l + 1, -1), prev(l + 1, -1);
-    dp[0] = 0;
-
-    for (int i = 1; i <= l; i++) {
-        for (int j = 0; j < 5; j++) {
-            if (heights[j] > i || dp[i - heights[j]] == -1) continue;
-
-            if (dp[i] < dp[i - heights[j]] + 1) {
-                dp[i] = dp[i - heights[j]] + 1;
-                prev[i] = heights[j];
-            }
-        }
-    }
-
-
-
-    if (dp[l] == -1) {
-        cout << "Impossible" << endl;
-    } else {
-        set <pair <int, int>, comp> store;
-
-        int temp = l;
-
-        map <int, int> keep;
-
-        while (temp != 0) {
-            keep[prev[temp]]++;
-            temp = temp - prev[temp];
-        }
-
-        for (auto it: keep) {
-            store.insert({it.second, it.first});
-        }
-
-        for (auto it: store) {
-            cout << it.second << " ";
-        }
-        cout << endl;
-    }
+    cout << st.query(0, 2) << endl;
+    st.update(1, 5);
+    cout << st.query(0, 2) << endl;
+    
 
     return 0;
 }
