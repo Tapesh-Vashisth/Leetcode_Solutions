@@ -1,0 +1,1 @@
+head file.txt | tail -1
